@@ -4,10 +4,12 @@ services:
     - docker
 
 before_install:
-    - docker build -t containerly/murmur:travis library/murmur
-    - docker run -d -p 64738:64738 containerly/murmur:travis
-    - docker build -t containerly/createrepo:travis library/createrepo
+    - docker build -t containerly/murmur:test images/murmur
+    - docker run -d -p 64738:64738 containerly/murmur:test
+    - docker build -t containerly/createrepo:test images/createrepo
+    - docker build -t containerly/rpmbuild:test images/rpm-build
 
 script:
-  - docker ps | grep containerly/murmur:travis
-  - docker run -it --rm containerly/createrepo:travis --version
+    - docker ps | grep containerly/murmur:test
+    - docker run -it --rm containerly/createrepo:test --version
+    - docker run -it --rm containerly/rpmbuild:test --version
