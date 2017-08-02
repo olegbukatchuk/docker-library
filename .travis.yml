@@ -1,4 +1,5 @@
 sudo: required
+language: generic
 
 services:
     - docker
@@ -13,3 +14,6 @@ script:
     - docker ps | grep containerly/murmur:test
     - docker run -it --rm containerly/createrepo:test --version
     - docker run -it --rm containerly/rpmbuild:test --version
+
+after_success:
+    - ./lib/deploy

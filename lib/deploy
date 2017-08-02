@@ -1,0 +1,55 @@
+#!/usr/bin/env sh
+
+
+log() {
+    prefix="deploy"
+
+    type="$1"
+    shift
+
+    case "$type" in
+        info)
+            echo "${prefix}: info: $*"
+            ;;
+        fatal)
+            echo "${prefix}: fatal: $*"
+            ;;
+        *)
+            log fatal "invalid log type '$type'"
+            ;;
+    esac
+}
+
+
+try() {
+    if command $* > /dev/null 2>&1; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+
+log info "current branch: $TRAVIS_BRANCH"
+log info "current commit: $TRAVIS_COMMIT"
+log info "commit range: $TRAVIS_COMMIT_RANGE"
+
+
+if [ "$TRAVIS_BRANCH" != "master" ]; then
+    log info "building from push to master..."
+
+    if ! try git diff --name-only $TRAVIS_COMMIT_RANGE; then
+        log info "git-diff using TRAVIS_COMMIT_RANGE failed"
+        log info "falling back to single commit mode"
+
+        for file in $(git diff-tree --no-commit-id --name-only -r $TRAVIS_COMMIT); do
+            log info "filename: $file"
+        done
+    else
+        for file in $(git diff --name-only $TRAVIS_COMMIT_RANGE); do
+            log info "filename: $file"
+        done
+    fi
+else
+    log info "not on master branch, aborting"
+fi
